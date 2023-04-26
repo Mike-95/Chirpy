@@ -11,6 +11,14 @@ func main() {
 	mux := http.NewServeMux()
 	corsMux := middlewareCors(mux)
 
+	// Convert the current directory "." to a http.FileSystem object
+	staticDir := http.Dir(".")
+
+	// Create a new file server instance serving files from the static directory
+	fileServer := http.FileServer(staticDir)
+
+	mux.Handle("/", fileServer)
+
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: corsMux,
