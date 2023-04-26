@@ -6,18 +6,13 @@ import (
 )
 
 func main() {
+	const filePathRoot = "."
 	const port = "8080"
 	// create a new ServeMux
 	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.Dir(filePathRoot)))
+
 	corsMux := middlewareCors(mux)
-
-	// Convert the current directory "." to a http.FileSystem object
-	staticDir := http.Dir(".")
-
-	// Create a new file server instance serving files from the static directory
-	fileServer := http.FileServer(staticDir)
-
-	mux.Handle("/", fileServer)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
