@@ -6,9 +6,18 @@ import (
 )
 
 func (cfg *apiConfig) handlerMetrics(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	writer.Header().Add("Content-Type", "text/html")
 	writer.WriteHeader(http.StatusOK)
-	fmt.Fprintf(writer, "Hits: %d", cfg.fileserverHits)
+	writer.Write([]byte(fmt.Sprintf(`
+<html>
+	<body>
+<h1>Welcome, Chirpy Admin</h1>
+<p>Chirpy has been visited %d times!</p>
+	</body>
+	</html>
+
+`, cfg.fileserverHits)))
+
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {

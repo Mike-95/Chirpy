@@ -23,8 +23,11 @@ func main() {
 
 	mainRouter := chi.NewRouter()
 	mainRouter.Get("/healthz", handlerReadiness)
-	mainRouter.Get("/metrics", cfg.handlerMetrics)
 	r.Mount("/api", mainRouter)
+
+	adminRouter := chi.NewRouter()
+	adminRouter.Get("/metrics", cfg.handlerMetrics)
+	r.Mount("/admin", adminRouter)
 
 	corsMux := middlewareCors(r)
 
