@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type apiConfig struct {
@@ -47,8 +48,9 @@ func handlerValidate(writer http.ResponseWriter, request *http.Request) {
 		Body string `json:"body"`
 	}
 	type returnVals struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
+
 	decoder := json.NewDecoder(request.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
@@ -62,9 +64,18 @@ func handlerValidate(writer http.ResponseWriter, request *http.Request) {
 		respondWithError(writer, http.StatusBadRequest, "Chirp is too long")
 		return
 	}
+
+	badWords := map[string]struct{}{
+		"kerfuffle": {},
+		"sharbert":  {},
+		"fornax":    {},
+	}
+	cleaned := getCleanBody(params.Body, badWords)
+
 	respondWithJSON(writer, http.StatusOK, returnVals{
-		Valid: true,
+		CleanedBody: cleaned,
 	})
+
 }
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
@@ -90,4 +101,17 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.WriteHeader(code)
 	w.Write(dat)
+}
+
+func getCleanBody(body string, badWords map[string]struct{}) string {
+	words := strings.Split(body, " ")
+	for i, word := range words {
+		loweredWord := strings.ToLower(word)
+		if _, ok := badWords[loweredWord]; ok {
+			words[i] = "****"
+		}
+	}
+	cleaned := strings.Join(words, " ")
+	return cleaned
+
 }
